@@ -1,9 +1,9 @@
-const db = require('../models/todo');
+const db = require('../models');
 
 module.exports = function(app) {
 
     app.get('/todo', function(req, res) {
-        db.find({})
+        db.ToDo.find({})
             .then(function (dbToDo) {
                 res.json(dbToDo);
             })
@@ -13,7 +13,7 @@ module.exports = function(app) {
     });
 
     app.post('/todo', function(req, res) {
-        db.create(req.body)
+        db.ToDo.create(req.body)
             .then(function (dbToDo) {
                 res.send(dbToDo);
             })
@@ -23,7 +23,7 @@ module.exports = function(app) {
     }); 
     
     app.delete('/todo/:id', function(req, res) {
-        db.remove(req.params.id)
+        db.ToDo.findOneAndDelete(req.params.id)
         .then(function (dbToDo) {
             res.json(dbToDo);
         })

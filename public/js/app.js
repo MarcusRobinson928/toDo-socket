@@ -1,80 +1,83 @@
-$(document).ready(function() {
-    
-const socket = io();
-
-getTodos()
-
-function getTodos() {
-    $('#todoList').append('')
-    $.get('/todo', function(data) {
-        data.forEach( element => {
-            $('#todoList').append(`<li>${element.todo}</li>
-          <div id="icon"><button id="circle" class="far fa-circle"></button></div>`);
-        })
-      });
-  }
-
-$('#todo').keydown(function(event){
-    if (event.keyCode === 13){
-        event.preventDefault();
-        todo = $('#todo').val();
-        if(todo === ''){
-            alert('Must Enter A ToDo')
-        } else {
-        socket.emit('new-todo', {todo: todo})
-        $('#todo').val('')
-        }
+function date() {
+    var d = new Date();
+    var days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thur', 'Fri', 'Sat'];
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    document.getElementById('day').innerHTML = days[d.getDay()]
+    document.getElementById('date').innerHTML = months[d.getMonth()] + '  ' + d.getDate() + `<br>` + d.getFullYear();
     }
-})
+
+$(document).ready(function () {
+    const socket = io();
+    date()
+    getTodos()
+
+    function getTodos() {
+        $('#todoList').append('')
+        $.get('/todo', function (data) {
+            data.forEach(element => {
+                $('#todoList').append(`<li>${element.todo}</li>
+          <div id="icon"><button id="circle" class="far fa-circle"></button></div>`);
+            })
+        })
+    }
+
+    $('#todo').keydown(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            todo = $('#todo').val();
+            if (todo === '') {
+                alert('Must Enter A ToDo')
+            } else {
+                socket.emit('new-todo', { todo: todo })
+                $('#todo').val('')
+            }
+        }
+    })
 
 
-socket.on('emit-todo', function(todos){
-                $.ajax({url:'/todo', method:'POST', data: todos})
-                .then($('#todoList').empty());
-                getTodos()
-})
+    socket.on('emit-todo', function (todos) {
+        $.ajax({ url: '/todo', method: 'POST', data: todos })
+            .then($('#todoList').empty());
+        getTodos()
+    })
 
-const complete = function(){
-    $('button').remove('#circle')
-    $('#icon').append(`<button id="remove" class="far fa-times-circle"></button>`)
-    $('li').toggleClass('complete')
-} 
+    const complete = function (event) {
+        event.stopPropagation();
+        var id = $(this);
+        console.log(id)
+        $('button').remove('#circle')
+        $('#icon').append(`<button id="remove" class="far fa-times-circle"></button>`)
+        $('li').toggleClass('complete')
+    }
 
-$(document).on("click", "#circle", complete);
-$(document).on("click", "#remove", message);
-// $(document).on("click", ".delete", remove);
+    $(document).on("click", "#circle", complete);
+    $(document).on("click", "#remove", message);
 
-function remove() {
-    $.ajax({
-      method: "DELETE", url: "/todo/:id" 
-    }).then($('.deleteMessage').slideUp(),
-    $('#todoList').empty(),
-    getTodos())
-  }
+    function remove() {
+        $.ajax({
+            method: "DELETE", url: "/todo/:id"
+        }).then($('.deleteMessage').slideUp(),
+            $('#todoList').empty(),
+            getTodos())
+    }
 
 
-$('i').ready(function() {
-    $('#complete').click(function() {
-        message();
+    $('i').ready(function () {
+        $('#complete').click(function () {
+            message();
+        });
+        $('.cancel').click(function () {
+            hide();
+        });
+        $('.delete').click(function () {
+            remove();
+        });
     });
-    $('.cancel').click(function(){
-        hide();
-      });
-      $('.delete').click(function(){
-        remove();
-      });
-});
 
-function message() {
-    $('.deleteMessage').slideDown();
-}
-function hide() {
-    $('.deleteMessage').slideUp();
-}
-   
-var d = new Date();
-var days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thur', 'Fri', 'Sat'];
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-document.getElementById('day').innerHTML = days[d.getDay()]
-document.getElementById('date').innerHTML = months[d.getMonth()] + '  ' + d.getDate() + `<br>` + d.getFullYear();
+    function message() {
+        $('.deleteMessage').slideDown();
+    }
+    function hide() {
+        $('.deleteMessage').slideUp();
+    }
 });
